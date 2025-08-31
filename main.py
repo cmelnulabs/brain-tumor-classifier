@@ -38,12 +38,21 @@ def main():
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=2)
 
+    model_file = Path(MODEL_PATH)
+    if model_file.exists():
+        print(f"\nFound existing model at {MODEL_PATH}. Loading and evaluating...")
+        model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
+        test_loss, test_accuracy = evaluate_model(model, test_loader, criterion, device)
+        print(f"Test Loss: {test_loss:.4f}")
+        print(f"Test Accuracy: {test_accuracy:.4f}")
+        return
+
     best_loss = float('inf')
     epochs_no_improve = 0
     best_test_accuracy = 0.0
 
-    epoch_iter = tqdm(range(NUM_EPOCHS), desc="Epochs")
-    for epoch in epoch_iter:
+    for epoch in range(NUM_EPOCHS):
+        print(f"\nEpoch {epoch+1}/{NUM_EPOCHS}")
         train_loss, train_acc = train_one_epoch(model, train_loader, criterion, optimizer, device, show_progress=True)
         print(f"Train Loss: {train_loss:.4f} | Train Accuracy: {train_acc:.4f}")
         test_loss, test_accuracy = evaluate_model(model, test_loader, criterion, device, show_progress=True)
