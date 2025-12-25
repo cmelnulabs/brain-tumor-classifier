@@ -1,1 +1,5 @@
 archive/
+.venv
+*.pt
+*__pycache__*
+docs/build

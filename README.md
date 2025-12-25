@@ -36,8 +36,6 @@ Before proceeding, ensure you have **Conda** installed on your system. You can i
 
 
 Let’s get your Brain Tumor Classifier up and running on **Windows or Linux**! Follow these steps:
-=======
-Let's get your Brain Tumor Classifier up and running! Follow these simple steps:
 
 
 ### 1. 🌐 Create a New Environment (Recommended)
@@ -58,52 +56,68 @@ conda install -c pytorch -c conda-forge pytorch torchvision torchaudio cpuonly
 matplotlib=3.8.4 pillow=9.5.0 -y
 ```
 
-### 3. 📊 Set up Jupyter & ipykernel
-
-Get ready for interactive coding and analysis!
-
-```bash
-conda install -c conda-forge jupyterlab notebook ipykernel -y
-```
-
-### 4. 🧑‍💻 Install KaggleHub
+### 3. 🧑‍💻 Install KaggleHub
 
 ```bash
 pip install kagglehub
 ```
 
----
+## Usage
 
-### 5. 🚀 Opening Your Project in Jupyter Notebook
-
-Once you've followed the installation steps and activated your environment, opening your project is simple!
-
-To open your project and start working with your notebooks, make sure your Conda environment (e.g., brain-tumor-classifier) is activated. Then, simply type the following command in your terminal:
+After activating the environment:
 
 ```bash
-jupyter notebook
+python -m main
 ```
 
-This command will:
+What happens:
+1. The dataset is downloaded automatically via KaggleHub (cached after first run).
+2. Data is loaded from the extracted `Training/` and `Testing/` folders.
+3. The model trains with class weighting, learning rate scheduling, and early stopping.
+4. The best model (by test accuracy) is saved to `best_brain_tumor_model.pt`.
 
--Start the Jupyter Notebook server.
-
--Open a new tab in your default web browser, displaying the Jupyter Notebook interface.
-
-## Usage
+To rerun without re‑downloading, just execute the same command; KaggleHub uses a local cache.
 
 ## Dataset
 
+Source: `masoudnickparvar/brain-tumor-mri-dataset` (Kaggle). Classes are auto-detected from directory names. Grayscale conversion + resize to 224×224 + normalization (mean=0.5, std=0.5).
+
 ## Model Architecture
+
+Compact CNN stack (all with ReLU + BatchNorm):
+`1→8→16→32→64→128→256→512` feature maps with intermittent MaxPool (stride 2). Final: Flatten → Linear (512→num_classes). One dropout layer (p=0.2) after the 64‑channel block.
 
 ## Training
 
+Features:
+* Optimizer: Adam (lr = 5e-4)
+* Loss: CrossEntropy with inverse-frequency class weights
+* Scheduler: ReduceLROnPlateau (factor 0.5, patience 2)
+* Early stopping: patience = 3 epochs (monitors training loss)
+* Progress bars: per-epoch, batch-level (tqdm)
+
+Adjust hyperparameters in `btclassifier/config.py`.
+
 ## Evaluation
+
+Per epoch: test loss & accuracy. After training: reload best checkpoint and report final metrics. Modify/extend in `btclassifier/evaluate.py`.
 
 ## Results
 
+Add your benchmark table here (e.g., accuracy, per-class precision/recall). Example placeholder:
+
+| Run | Test Acc | Notes |
+|-----|----------|-------|
+| 1   | 0.XX     | baseline |
+
 ## Contributing
+
+Open an issue or submit a PR with clear description. Keep code modular (see `btclassifier/` package layout).
 
 ## License
 
+See `LICENSE` file.
+
 ## Acknowledgments
+
+Dataset authors and the PyTorch community.
